@@ -3,7 +3,7 @@
 // @namespace    https://github.com/Schegge
 // @description  Change font, size, width and background of a work + blacklist: hide works that contain certains tags or text, have too many tags/fandoms/relations/chapters/words and other options + fullscreen reading mode + bookmarks: save the position you stopped reading a fic + number of words for each chapter and estimated reading time
 // @icon         https://raw.githubusercontent.com/Schegge/Userscripts/master/images/ao3icon.png
-// @version      3.6.1.3
+// @version      3.6.1.4
 // @author       Schegge
 // @match        *://archiveofourown.org/*
 // @match        *://www.archiveofourown.org/*
@@ -38,8 +38,8 @@ if (typeof GM == 'undefined') {
    const Check = {
       // script version
       version: async function() {
-         if (await getStorage('version', '1') !== 3613) {
-            setStorage('version', 3613);
+         if (await getStorage('version', '1') !== 3614) {
+            setStorage('version', 3614);
             return true;
          }
          return false;
@@ -151,7 +151,7 @@ if (typeof GM == 'undefined') {
             Feature.wpm}"> Words per minute</a></li>
          <li><a class="${SN}-save" id="${SN}-feature-save">SAVE</a></li>
       </ul>`;
-   document.querySelector('#header > ul').appendChild(featureMenu);
+   document.querySelector('#header ul.primary.navigation.actions').appendChild(featureMenu);
 
    document.getElementById(`${SN}-feature-save`).addEventListener('click', function() {
       Feature.style = document.getElementById(`${SN}-feature-style`).checked;
@@ -256,7 +256,7 @@ if (typeof GM == 'undefined') {
             let bookMenuDrop = document.createElement('ul');
             bookMenuDrop.className = 'menu dropdown-menu';
             bookMenu.appendChild(bookMenuDrop);
-            document.querySelector('#header > ul').appendChild(bookMenu);
+            document.querySelector('#header ul.primary.navigation.actions').appendChild(bookMenu);
 
             if (this.list.length) {
                let self = this;
@@ -837,7 +837,7 @@ if (typeof GM == 'undefined') {
                      <span title="hide relationships that include only one person of your favourite ship (only for tags)">only otp: &!</span>
                   </li>
                </ul>`;
-            document.querySelector('#header > ul').appendChild(blackMenu);
+            document.querySelector('#header ul.primary.navigation.actions').appendChild(blackMenu);
 
             document.getElementById(`${SN}-black-save`).addEventListener('click', function() {
                Blacklist.setValues();

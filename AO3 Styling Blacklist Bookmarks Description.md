@@ -67,7 +67,7 @@
    - (it can be used only once in the same rule, one&&two&&three or more won't work)
  
 - Use **&!** to hide works with romantic relationships that include only one person of your favourite ship (it can only be used in the Tags area).
-   - Example: harry potter&!draco malfoy
+   - Example: james t. kirk&!spock
    - (it hides all works that contain these two characters in other romantic relationships)
  
 - *Note:* Tags and Authors areas will hide works that exactly matched a tag or an author with one of your rule, unless you use wildcards or the other symbols above. Instead, Titles, Summaries area will hide works that contains specified words or phrases.
@@ -83,4 +83,4 @@
 
 ---
 
-*Please report bugs*. Script tested on the last version of Chrome and Firefox (with Violentmonkey, Tampermonkey and Greasemonkey)
+*Please report bugs*
