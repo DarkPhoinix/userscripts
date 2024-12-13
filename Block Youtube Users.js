@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Block Youtube Users Resurect
 // @namespace    https://github.com/Schegge
-// @description  Hide videos of blacklisted users/channels and comments fork of: https://github.com/Schegge Block Youtube Users moded by DarkPhoinix
+// @description  Hide videos of blacklisted users/channels and comments fork of: https://github.com/Schegge Block Youtube Users moded by DarkPhoinix need :https://greasyfork.org/scripts/433051
 // @icon         https://raw.githubusercontent.com/Schegge/Userscripts/master/images/BYUicon.png
 // @version      2.6.0.1
 // @author       Schegge
