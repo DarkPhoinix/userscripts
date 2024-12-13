@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Block Youtube Users
+// @name         Block Youtube Users Resurect
 // @namespace    https://github.com/Schegge
-// @description  Hide videos of blacklisted users/channels and comments
+// @description  Hide videos of blacklisted users/channels and comments fork of: https://github.com/Schegge Block Youtube Users moded by DarkPhoinix
 // @icon         https://raw.githubusercontent.com/Schegge/Userscripts/master/images/BYUicon.png
-// @version      2.5.3.1
+// @version      2.6.0.1
 // @author       Schegge
 // @match        https://www.youtube.com/*
 // @exclude      *://*.youtube.com/embed/*
@@ -14,11 +14,15 @@
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js
+// @downloadURL https://update.greasyfork.org/scripts/11057/Block%20Youtube%20Users.user.js
+// @updateURL https://update.greasyfork.org/scripts/11057/Block%20Youtube%20Users.meta.js
 // ==/UserScript==
 
 // gm4 polyfill https://github.com/greasemonkey/gm4-polyfill
 if (typeof GM == 'undefined') {
+   // Definizione del polifill per le funzionalità GM
    this.GM = {};
+   // Aggiunta dei metodi GM_getValue e GM_setValue al polifill
    Object.entries({
       'GM_getValue': 'getValue',
       'GM_setValue': 'setValue'
@@ -35,12 +39,13 @@ if (typeof GM == 'undefined') {
 (async function($) {
    /* VALUES */
 
-   const DEBUGGING = false;
+//  const DEBUGGING = false;
+const DEBUGGING = true;
 
    const Values = {
       storageVer: '1',
       storageSep: ',',
-      storageTimer: 1000,
+      storageTimer: 100,
       storageComment: '',
       storageVideo: '',
       storageAdd: '',
@@ -53,7 +58,7 @@ if (typeof GM == 'undefined') {
    // get saved values
    Values.storageVer = await GM.getValue('byuver', '1');
    Values.storageSep = await GM.getValue('sep', ',');
-   Values.storageTimer = await GM.getValue('timer', 1000);
+   Values.storageTimer = await GM.getValue('timer', 100);
    Values.storageComment = await GM.getValue('hidecomments', '');
    Values.storageVideo = await GM.getValue('enablepause', '');
    Values.storageAdd = await GM.getValue('enableadd', '');
@@ -84,8 +89,12 @@ if (typeof GM == 'undefined') {
             #info #text.ytd-channel-name,
             #metadata #subscribers.ytd-channel-renderer,
             #byline.ytd-playlist-panel-video-renderer,
-            #meta #upload-info #channel-name #text.ytd-channel-name
+            #meta #upload-info #channel-name #text.ytd-channel-name,
+            #text.style-scope.ytd-channel-name,
+            yt-simple-endpoint.style-scope.yt-formatted-string
+
             ${Values.storageComment ? ', #author-text span.ytd-comment-renderer, #name #text.ytd-channel-name' : ''}`,
+
 
       renderer: `ytd-rich-item-renderer,
             ytd-video-renderer,
@@ -101,10 +110,21 @@ if (typeof GM == 'undefined') {
             ytd-compact-playlist-renderer,
             ytd-grid-video-renderer,
             ytd-grid-playlist-renderer,
-            ytd-secondary-search-container-renderer
+            ytd-secondary-search-container-renderer,
+            ytb-videowall-still-info-content,
+            ytp-videowall-still-info-author,
+            #c4-player.div.html5-video-container.video,
+            div.html5-video-container.video,
+            #movie_player.div.html5-video-container.video,
+            video-stream.html5-main-video,
+            #movie_player.div.html5-endscreen.ytp-player-content.videowall-endscreen.ytp-show-tiles
             ${Values.storageComment ? ', ytd-comment-renderer.ytd-comment-replies-renderer, ytd-comment-thread-renderer' : ''}`,
 
-      userVideo: '#meta #upload-info #channel-name #text.ytd-channel-name'
+   // funziona
+        userVideo: 'yt-simple-endpoint.style-scope.yt-formatted-string,#text.style-scope.ytd-channel-name'
+       //userVideo: '#text.style-scope.ytd-channel-name'
+
+
    };
 
    /* INTERVAL FOR BLACKLISTING */
@@ -118,7 +138,7 @@ if (typeof GM == 'undefined') {
       #byu-is-black { display: none!important; }
       .byu-add { font-size: .8em; margin-right: .5em; cursor: pointer; color: var(--yt-brand-youtube-red, red); font-family: consolas, monospace; float: left; }
       #byu-icon { display: inline-block; position: relative; text-align: center; width: 40px; height: 24px; margin: 0 8px; font-weight: 100; }
-      #byu-icon span { color: var(--yt-spec-icon-active-other); cursor: pointer; font-size: 20px; vertical-align: middle; }
+      #byu-icon span { color: red; cursor: pointer; font-size: 27px; vertical-align: middle; }
       #byu-options { width: 30%; max-width: 250px; display: flex; flex-flow: row wrap; align-items: baseline; position: fixed; right: 10px; padding: 15px; text-align: center; color: var(--yt-spec-text-primary); background-color: var(--yt-spec-base-background); border: 1px solid var(--yt-spec-10-percent-layer); z-index: 99999; }
       #byu-options div { width: 50%; flex-grow: 1; box-sizing: border-box; padding: 5px; font-size: .9em; }
       #byu-save { font-size: 1.5em!important; font-weight: bold; cursor: pointer; color: var(--yt-brand-youtube-red, red); }
@@ -138,18 +158,55 @@ if (typeof GM == 'undefined') {
    </style>`);
 
    /* VIDEO FIRST PAGE */
+videofirstpage();
 
-   if (Values.storageVideo && /\/watch/.test(window.location.href)) {
+
+  function videofirstpage() {
+      //let usernamemio = $(Where.userVideo).first().text().trim();
+        let usermio = $(Where.user).first().text().trim();
+        let renderermio = $(Where.render).text().trim();
+        let userVideomio = $(Where.userVideo).first().text().trim();
+     if (DEBUGGING) {
+               console.log('sono qui:/* VIDEO FIRST PAGE */');
+               console.log('usermio:',usermio);
+               console.log('renderermio:',renderermio);
+               console.log('userVideomio:',userVideomio);
+            }
+
+   if (Values.storageVideo && /\/watch/||/\/@/.test(window.location.href)) {
       let waitUserVideo = setInterval(() => {
-         if ($(Where.userVideo).length) {
-            clearInterval(waitUserVideo);
 
-            let username = $(Where.userVideo).text().trim();
-            if (ifMatch(username.toLowerCase())) {
-               let video = $('#player video.video-stream.html5-main-video');
-               video.get(0).pause();
+          if (DEBUGGING) {
+               console.log('sono qui:let waitUserVideo',Where.userVideo);
+            }
+// modifico:
+          //if ($(Where.userVideo).length) {
+
+          if ($(Where.userVideo).length) {
+            clearInterval(waitUserVideo);
+// originale
+            //let username = $(Where.userVideo).text().trim();
+            //let username = $(Where.userVideo).text().trim().replace(/\s+/g, ' ');
+//let username = $(Where.userVideo).first().text().trim().replace(/\s+/g, ' ');
+  let username = $(Where.userVideo).first().text().trim();
+              if (DEBUGGING) {
+               console.log('sono qui:let username','Where.userVideo:',Where.userVideo,'username:',username );
+            }
+              if (ifMatch(username.toLowerCase())) {
+
+              let video = $('#player video.video-stream.html5-main-video');
+              // let video = $('video');
+
+               if (DEBUGGING) {
+               console.log('sono qui:let video');
+            }
+
+                video.get(0).pause();
                video.get(0).currentTime = 0;
                let pausing = setInterval(() => {
+                   if (DEBUGGING) {
+               console.log('sono qui:let pausing');
+            }
                   if (!video.get(0).paused) {
                      video.get(0).pause();
                      video.get(0).currentTime = 0;
@@ -161,12 +218,12 @@ if (typeof GM == 'undefined') {
                setTimeout(() => {
                   $('#byu-video-page-black').remove();
                   clearInterval(pausing);
-               }, 10000);
+               }, 2000);
             }
          }
       }, 1000);
    }
-
+}
    /* BLACKLIST MENU */
 
    $('body').append(`<div id="byu-options" style="display: none;">
@@ -188,7 +245,7 @@ if (typeof GM == 'undefined') {
          Values.storageComment ? 'checked' : ''
       }></div>
       <div class="byu-opt" title="interval between new checks">timer
-         <input id="byu-timer" type="number" min="500" max="5000" step="500" title="in milliseconds" value="${
+         <input id="byu-timer" type="number" min="100" max="5000" step="100" title="in milliseconds" value="${
          Values.storageTimer
       }"></div>
       <div class="byu-opt" title="if user blacklisted">pause video
@@ -256,16 +313,35 @@ if (typeof GM == 'undefined') {
             user.closest(Where.renderer).attr('id', 'byu-is-black');
 
             if (DEBUGGING) {
-               console.log('BYU- MATCHED USER', user, user.closest(Where.renderer));
+               console.log('BYU- MATCHED USER','user:', user, 'user.closest:',user.closest(Where.renderer));
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             user.data('black', 'yes');
          // show if it was hidden with another username or deleted username from blacklist
+       //   videofirstpage();
          } else if (user.data('black')) {
             user.closest(Where.renderer).removeAttr('id');
             user.data('black', '');
+  videofirstpage();
          }
       }
+
+
+
    }
 
    // check if it needs to be blacklisted
@@ -285,6 +361,44 @@ if (typeof GM == 'undefined') {
    }
 
    /* EVENT LISTENERS */
+
+
+
+
+//$(document).on('click', 'a, img, div', function(event) {
+$(document).on('click', function(event) {
+   // $(document).on('click', function(event) {
+    // Chiamata alla funzione dopo il click del mouse
+setTimeout(function() {
+    dopoClick(event);
+    }, 1000);
+});
+
+// Definizione della funzione da chiamare dopo il click del mouse
+function dopoClick(event) {
+    // Inserisci qui il codice che desideri eseguire dopo il click del mouse
+// Puoi chiamare altre funzioni o eseguire altre operazioni qui
+
+    if (DEBUGGING) {
+    console.log('CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK ');
+
+    let username = "";
+    let usermio = "";
+    let renderermio = "";
+    let userVideomio = "";
+    console.log('HO CANCELLATO , username, usermio,renderermio,userVideomio');
+               console.log('usermio:',usermio);
+               console.log('renderermio:',renderermio);
+               console.log('userVideomio:',userVideomio);
+}
+
+
+    videofirstpage();
+}
+
+
+
+
 
    // open/close options
    $(buttonB).on('click', openMenu);
@@ -314,7 +428,7 @@ if (typeof GM == 'undefined') {
          $(this).text('ERROR! separator');
       } else {
          Values.storageSep = $('#byu-sep').val();
-         Values.storageTimer = Math.max(parseInt($('#byu-timer').val(), 10), 500) || 1000;
+         Values.storageTimer = Math.max(parseInt($('#byu-timer').val(), 10), 100) || 1000;
          Values.storageComment = $('#byu-hidecomments').is(':checked') ? 'yes' : '';
          Values.storageVideo = $('#byu-enablepause').is(':checked') ? 'yes' : '';
          Values.storageAdd = $('#byu-enableadd').is(':checked') ? 'yes' : '';
@@ -360,6 +474,8 @@ if (typeof GM == 'undefined') {
          console.log('BYU- username already in the blacklist?', Values.storageBlacklist.includes(username));
       }
 
+
+
       if (!Values.storageBlacklist.includes(username)) {
          Values.storageBlacklist.push(username);
          let blacks = Values.storageBlacklist.join(`${Values.storageSep} `);
@@ -367,6 +483,12 @@ if (typeof GM == 'undefined') {
          GM.setValue('savedblocks', blacks);
          search(true);
       }
+
+
+       videofirstpage();
+
+
+
    });
 
 })(jQuery);
